@@ -3,7 +3,7 @@ Webform Drupal 7 to Drupal 8
 
 A Drupal 8 module to migrate webforms and their submissions from Drupal 7 to Drupal 8.
 
-For more information on why this was create, see the blog post [Migrating Webforms from Drupal 7 to Drupal 8, Dec. 18, 2017, Dcycle Blog](http://blog.dcycle.com/blog/2017-12-18/migrating-webforms-drupal7-to-drupal8)
+For more information on why this was create, see the blog post [Migrating Webforms from Drupal 7 to Drupal 8, Dec. 18, 2017, Dcycle Blog](http://blog.dcycle.com/blog/2017-12-18/migrating-webforms-drupal7-to-drupal8/)
 
 Installing
 -----
