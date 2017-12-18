@@ -39,6 +39,10 @@ class Webform {
    * @throws Exception
    */
   public function deleteSubmissions() {
+    if (isset($this->options['simulate']) && $this->options['simulate']) {
+      $this->print('SIMULATE: Delete submissions for webform before reimporting them.');
+      return;
+    }
     $query = $this->getConnection('default')->select('webform_submission', 'ws');
     $query->condition('ws.webform_id', 'webform_' . $this->getNid());
     $query->addField('ws', 'sid');
@@ -107,6 +111,23 @@ class Webform {
         $this->print('ERROR with submission (errors and possible fixes will be shown at the end of the process)');
         WebformMigrator::instance()->addError($t->getMessage());
       }
+    }
+    $node = node_load($this->getNid());
+    if (isset($this->options['simulate']) && $this->options['simulate']) {
+      $this->print('SIMULATE: Linking node to the webform we just created.');
+    }
+    elseif ($node) {
+      try {
+        $this->print('Linking node @n to the webform we just created.', ['@n' => $this->getNid()]);
+        $node->webform->target_id = 'webform_' . $this->getNid();
+        $node->save();
+      }
+      catch (\Exception $e) {
+        $this->print('Node @n exists on the target environment, but we could not set the webform field to the appropriate webform, moving on...', ['@n' => $this->getNid()]);
+      }
+    }
+    else {
+      $this->print('Node @n does not exist on the target environment, moving on...', ['@n' => $this->getNid()]);
     }
   }
 
