@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ *
+ * Includes functions for running the Webform migration.
+ */
+
+use Drupal\webform_d7_to_d8\WebformMigrator;
+
+/**
+ * Run migration steps
+ *
+ * See ./README.md for details and usage.
+ *
+ * @param array $options
+ *   Associative array specificying options. See ./README.md for details.
+ */
+function webform_d7_to_d8(array $options = []) {
+  WebformMigrator::instance()->run($options);
+}
+
+function webform_d7_to_d8_test_connection() {
+  WebformMigrator::instance()->testConnection();
+}

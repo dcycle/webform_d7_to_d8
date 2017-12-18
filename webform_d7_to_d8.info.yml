@@ -1,0 +1,5 @@
+name: Webform Drupal 7 to Drupal 8
+type: module
+description: 'Migrates Drupal 7 webforms to Drupal 8.'
+core: '8.x'
+php: 7
