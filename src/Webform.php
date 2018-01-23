@@ -64,6 +64,13 @@ class Webform {
   }
 
   /**
+   * Return the first sid (submission id) to import.
+   */
+  public function firstSid() {
+    return \Drupal::state()->get('webform_d7_to_d8', 0);
+  }
+
+  /**
    * Get the Drupal 8 Webform object.
    *
    * @return Drupal\webform\Entity\Webform
@@ -100,7 +107,6 @@ class Webform {
     $components = $this->webformComponents();
     $this->print($this->t('Form @n: Processing components', ['@n' => $this->getNid()]));
     $this->updateD8Components($this->getDrupalObject(), $components->toFormArray(), $this->options);
-    $this->deleteSubmissions();
     $submissions = $this->webformSubmissions()->toArray();
     foreach ($submissions as $submission) {
       $this->print($this->t('Form @n: Processing submission @s', ['@n' => $this->getNid(), '@s' => $submission->getSid()]));
@@ -212,9 +218,12 @@ class Webform {
       }
     }
 
+    $this->print('Only getting submission ids > @s because we have already imported the others.', ['@s' => $this->firstSid()]);
+
     $query = $this->getConnection('upgrade')->select('webform_submissions', 'ws');
     $query->addField('ws', 'sid');
     $query->condition('nid', $this->getNid(), '=');
+    $query->condition('sid', $this->firstSid(), '>');
 
     if (isset($max)) {
       $this->print('You speicifc max_submissions to @n, so only some submissions will be processed.', ['@n' => $max]);
@@ -231,6 +240,7 @@ class Webform {
         $this->print('Ignoring it and moving on...');
         continue;
       }
+      $this->print('Importing submission @s', ['@s' => $sid]);
       $array[] = new Submission($this, $sid, (array) $info, $submitted_data[$sid], $this->options);
     }
 

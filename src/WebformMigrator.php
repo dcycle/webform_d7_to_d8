@@ -66,6 +66,22 @@ class WebformMigrator {
         $this->print($error);
       }
     }
+    $this->setLastImportedSid();
+  }
+
+  /**
+   * Remeber the last imported submission id in a state variable.
+   */
+  public function setLastImportedSid() {
+    $query = $this->getConnection('upgrade')->select('webform_submissions', 'ws');
+    $query->addField('ws', 'sid');
+    $query->range(0, 1);
+    $query->orderBy('sid', 'DESC');
+    $result = $query->execute()->fetchAllAssoc('sid');
+    $keys = array_keys($result);
+    $last = array_pop($keys);
+    $this->print('Keep track of latest imported submission id, @s, to not import the same submissions next time.', ['@s' => $last]);
+    \Drupal::state()->set('webform_d7_to_d8', $last);
   }
 
   /**
