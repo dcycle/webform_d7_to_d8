@@ -39,6 +39,27 @@ class Submission {
   }
 
   /**
+   * Check whether a submission was already processed.
+   *
+   * This is especially useful when an import was interrumpted.
+   *
+   * @return bool
+   *   Whether a submission was already processed.
+   *
+   * @throws \Throwable
+   */
+  public function alreadyProcessed() : bool {
+    $sid = $this->getSid();
+    $nid = $this->getWebformNid();
+
+    $items = $this->stateGetArray('webform_d7_to_d8_per_node', []);
+    if (isset($items[$nid])) {
+      return $items[$nid] >= $sid;
+    }
+    return FALSE;
+  }
+
+  /**
    * In cases where fields are required but not available, insert defaults.
    *
    * See ./README.md on how to set this up.
@@ -65,6 +86,17 @@ class Submission {
   }
 
   /**
+   * Get the legacy webform nid.
+   *
+   * @return int
+   *
+   * @throws \Exception
+   */
+  public function getWebformNid() : int {
+    return $this->webform->getNid();
+  }
+
+  /**
    * Imports the submission.
    *
    * @return string
@@ -73,6 +105,11 @@ class Submission {
    * @throws \Exception
    */
   public function process() : string {
+    if ($this->alreadyProcessed()) {
+      $this->print('Sid ' . $this->sid . ' for webform ' . $this->webform->getNid() . ' already processed; moving on...');
+      return 'already processed';
+    }
+
     // See https://www.drupal.org/docs/8/modules/webform/webform-cookbook/how-to-programmatically-create-a-submission
     $values = [
       'webform_id' => $this->webform->drupalObject->id(),
@@ -105,9 +142,24 @@ class Submission {
     else {
       // Submit values and get submission ID.
       $webform_submission = WebformSubmissionForm::submitValues($values);
+      $this->rememberLastSid();
       $return = $webform_submission->id();
     }
     return $return;
+  }
+
+  /**
+   * Remember that we processed this sid, to not do it multiple times.
+   *
+   * @throws \Exception
+   */
+  public function rememberLastSid() {
+    $sid = $this->getSid();
+    $nid = $this->getWebformNid();
+
+    $items = $this->stateGetArray('webform_d7_to_d8_per_node');
+    $items[$nid] = $sid;
+    $items = \Drupal::state()->set('webform_d7_to_d8_per_node', $items);
   }
 
 }

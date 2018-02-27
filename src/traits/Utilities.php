@@ -118,4 +118,8 @@ trait Utilities {
     // @codingStandardsIgnoreEnd
   }
 
+  public function stateGetArray(string $variable, array $default = []) : array {
+    return \Drupal::state()->get($variable, $default);
+  }
+
 }
