@@ -36,6 +36,8 @@ class Webform {
   /**
    * Delete all submissions for this webform on the Drupal 8 database.
    *
+   * This is never called, but is available to external code.
+   *
    * @throws Exception
    */
   public function deleteSubmissions() {
@@ -58,7 +60,7 @@ class Webform {
     $storage = \Drupal::entityTypeManager()->getStorage('webform_submission');
     foreach ($arrays as $array) {
       $submissions = WebformSubmission::loadMultiple($array);
-      $this->print('Deleting @n submissions for webform @f', ['@n' => count($submissions), '@f' => $webform_id]);
+      $this->print('Deleting @n submissions for webform @f', ['@n' => count($submissions), '@f' => $this->getNid()]);
       $storage->delete($submissions);
     }
   }
@@ -100,13 +102,20 @@ class Webform {
    * @throws \Exception
    */
   public function process($options = []) {
+    $new_only = empty($options['new-only']) ? FALSE : TRUE;
+    $continue = TRUE;
     $this->drupalObject = $this->updateD8Webform([
       'id' => 'webform_' . $this->getNid(),
       'title' => $this->title,
-    ], $options);
-    $components = $this->webformComponents();
-    $this->print($this->t('Form @n: Processing components', ['@n' => $this->getNid()]));
-    $this->updateD8Components($this->getDrupalObject(), $components->toFormArray(), $this->options);
+    ], $options, $new_only, $continue);
+    if ($continue) {
+      $components = $this->webformComponents();
+      $this->print($this->t('Form @n: Processing components', ['@n' => $this->getNid()]));
+      $this->updateD8Components($this->getDrupalObject(), $components->toFormArray(), $this->options);
+    }
+    else {
+      $this->print($this->t('Form @n: NOT processing components', ['@n' => $this->getNid()]));
+    }
     $submissions = $this->webformSubmissions()->toArray();
     foreach ($submissions as $submission) {
       $this->print($this->t('Form @n: Processing submission @s', ['@n' => $this->getNid(), '@s' => $submission->getSid()]));
@@ -213,7 +222,7 @@ class Webform {
     if (isset($this->options['max_submissions']) && $this->options['max_submissions'] !== NULL) {
       $max = $this->options['max_submissions'];
       if ($max === 0) {
-        $this->print('You speicifc max_submissions to 0, so no submissions will be loaded.');
+        $this->print('You specified max_submissions to 0, so no submissions will be loaded.');
         return new Submissions([]);
       }
     }

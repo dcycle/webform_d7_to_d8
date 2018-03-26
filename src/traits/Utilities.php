@@ -15,6 +15,11 @@ trait Utilities {
 
   use Environment;
 
+  /**
+   * Errors this class needs to keep track of.
+   *
+   * @var array
+   */
   public static $errors;
 
   /**
@@ -25,15 +30,26 @@ trait Utilities {
    * @param array $options
    *   Options originally passed to the migrator (for example ['nid' => 123])
    *   and documented in ./README.md.
+   * @param bool $new_only
+   *   Set to TRUE if you want to completely ignore webforms which preexist
+   *   on the target environment.
+   * @param bool $continue
+   *   This function will set this to FALSE if further processing, except
+   *   importing submissions (which will always happen), should occur.
    *
    * @return Webform
    *   A Drupal 8 webform object (Drupal\webform\Entity\Webform).
    */
-  public function updateD8Webform(array $info, array $options = []) : Webform {
+  public function updateD8Webform(array $info, array $options = [], bool $new_only = FALSE, bool &$continue = TRUE) : Webform {
     if (empty($info['title'])) {
       throw new \Exception('Name cannot be empty');
     }
     $webform = Webform::load($info['id']);
+    if ($webform && $new_only) {
+      $this->print('Webform ' . $info['id'] . ' already exists, aborting.');
+      $continue = FALSE;
+      return $webform;
+    }
     if (!$webform) {
       $webform = Webform::create($info);
     }
@@ -118,6 +134,19 @@ trait Utilities {
     // @codingStandardsIgnoreEnd
   }
 
+  /**
+   * Get a state variable which must be an array.
+   *
+   * @param string $variable
+   *   The variable name.
+   * @param array $default
+   *   The defalut value.
+   *
+   * @return array
+   *   The value.
+   *
+   * @throws Exception
+   */
   public function stateGetArray(string $variable, array $default = []) : array {
     return \Drupal::state()->get($variable, $default);
   }

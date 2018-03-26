@@ -1,6 +1,8 @@
 Webform Drupal 7 to Drupal 8
 -----
 
+[![CircleCI](https://circleci.com/gh/dcycle/webform_d7_to_d8.svg?style=svg)](https://circleci.com/gh/dcycle/webform_d7_to_d8)
+
 A Drupal 8 module to migrate webforms and their submissions from Drupal 7 to Drupal 8.
 
 For more information on why this was create, see the blog post [Migrating Webforms from Drupal 7 to Drupal 8, Dec. 18, 2017, Dcycle Blog](http://blog.dcycle.com/blog/2017-12-18/migrating-webforms-drupal7-to-drupal8/)
@@ -44,6 +46,25 @@ You can also run the migration with different options:
     drush ev 'webform_d7_to_d8(["simulate" => TRUE])'
     drush ev 'webform_d7_to_d8(["nid" => 123, "simulate" => TRUE])'
     drush ev 'webform_d7_to_d8(["max_submissions" => 10])'
+
+Reimporting vs. new-only methods
+-----
+
+By default, if a webform already exists on the target system, it is reimported, and changes on the target system are destroyed. For example:
+
+    drush ev 'webform_d7_to_d8(["nid" => 123])'
+
+At this point weform_123 exists on Drupal 8. Let's say you add a field, or remove or modify a field on the D8 webform, then run, again:
+
+    drush ev 'webform_d7_to_d8(["nid" => 123])'
+
+Your changes to D8 are deleted and weform_123 corresponds, again, to the state of webform 123 on D7. If this is _not_ what you want, you can specify:
+
+    drush ev 'webform_d7_to_d8(["nid" => 123, "new-only" => TRUE])'
+
+This will ensure that only new webforms are migrated _if they don't yet exist on the target D8 site_.
+
+This does not affect submissions, only webforms themselves.
 
 Problems with required fields
 -----
