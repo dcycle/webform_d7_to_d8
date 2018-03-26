@@ -1,0 +1,13 @@
+---
+version: 2
+jobs:
+  build:
+    # Circle CI can run its tests on a Docker container or on a VM. We
+    # are using a VM because our tests themselves need a functional
+    # Docker installation, and DinD (Docker in Docker) has issues.
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Tests
+          command: ./scripts/ci.sh

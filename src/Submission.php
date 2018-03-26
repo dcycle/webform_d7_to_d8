@@ -89,6 +89,7 @@ class Submission {
    * Get the legacy webform nid.
    *
    * @return int
+   *   The nid for this webform.
    *
    * @throws \Exception
    */
@@ -132,7 +133,7 @@ class Submission {
 
     // Check there are no validation errors.
     if (!empty($errors)) {
-      throw new \Exception('Errors with the following fields (they might be required, for example) for webform ' . $this->webform->getNid() . ': ' . implode(', ', array_keys($errors)). '. See ./README.md on how to fix required fields.');
+      throw new \Exception('Errors with the following fields (they might be required, for example) for webform ' . $this->webform->getNid() . ': ' . implode(', ', array_keys($errors)) . '. See ./README.md on how to fix required fields.');
     }
     elseif (isset($this->options['simulate']) && $this->options['simulate']) {
       $this->print('Simulating new submission');
