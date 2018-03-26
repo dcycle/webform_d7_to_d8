@@ -112,11 +112,11 @@ class Webform {
       $components = $this->webformComponents();
       $this->print($this->t('Form @n: Processing components', ['@n' => $this->getNid()]));
       $this->updateD8Components($this->getDrupalObject(), $components->toFormArray(), $this->options);
-      $submissions = $this->webformSubmissions()->toArray();
     }
     else {
       $this->print($this->t('Form @n: NOT processing components', ['@n' => $this->getNid()]));
     }
+    $submissions = $this->webformSubmissions()->toArray();
     foreach ($submissions as $submission) {
       $this->print($this->t('Form @n: Processing submission @s', ['@n' => $this->getNid(), '@s' => $submission->getSid()]));
       try {
@@ -222,7 +222,7 @@ class Webform {
     if (isset($this->options['max_submissions']) && $this->options['max_submissions'] !== NULL) {
       $max = $this->options['max_submissions'];
       if ($max === 0) {
-        $this->print('You speicifc max_submissions to 0, so no submissions will be loaded.');
+        $this->print('You specified max_submissions to 0, so no submissions will be loaded.');
         return new Submissions([]);
       }
     }
