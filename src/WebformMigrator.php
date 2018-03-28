@@ -54,7 +54,7 @@ class WebformMigrator {
     $webforms = $this->webforms($options)->toArray();
     foreach ($webforms as $webform) {
       $this->print('Processing webform with nid @n', ['@n' => $webform->getNid()]);
-      $webform->process();
+      $webform->process($options);
     }
     $errors = $this->errors();
     if (!count($errors)) {
