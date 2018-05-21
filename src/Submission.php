@@ -129,7 +129,7 @@ class Submission {
       $values['data'][$key] = $row['value'];
     }
 
-    $errors = WebformSubmissionForm::validateValues($values);
+    $errors = WebformSubmissionForm::validateFormValues($values);
 
     // Check there are no validation errors.
     if (!empty($errors)) {
@@ -142,7 +142,7 @@ class Submission {
     }
     else {
       // Submit values and get submission ID.
-      $webform_submission = WebformSubmissionForm::submitValues($values);
+      $webform_submission = WebformSubmissionForm::submitFormValues($values);
       $this->rememberLastSid();
       $return = $webform_submission->id();
     }
