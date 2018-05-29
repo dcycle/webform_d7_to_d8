@@ -29,6 +29,67 @@ class WebformMigrator {
   }
 
   /**
+   * Transform a legacy sid to a Drupal 8 sid (they are not carried over).
+   *
+   * @param int $nid
+   *   The legacy nid.
+   * @param int $sid
+   *   The legacy sid.
+   *
+   * @return int
+   *   0 if none or it cannot be calculated; otherwise returns the new sid.
+   *
+   * @throws Exception
+   */
+  public function d7ToD8sid(int $nid, int $sid) : int {
+    $query = $this->getConnection('upgrade')
+      ->select('webform_component', 'wc');
+    $query->addField('wc', 'cid');
+    $query->addField('wc', 'form_key');
+    $query->condition('nid', $nid);
+    $components = $query->execute()->fetchAllAssoc('cid');
+
+    $query = $this->getConnection('upgrade')
+      ->select('webform_submitted_data', 'wd');
+    $query->addField('wd', 'sid');
+    $query->addField('wd', 'nid');
+    $query->addField('wd', 'cid');
+    $query->addField('wd', 'data');
+    $query->condition('nid', $nid);
+    $query->condition('sid', $sid);
+    $result = $query->execute()->fetchAllAssoc('cid');
+
+    $results = [];
+    foreach ($result as $cid => $field) {
+      $results[$components[$cid]->form_key] = $field->data;
+    }
+
+    $candidates = [];
+
+    foreach ($results as $key => $value) {
+      $query = $this->getConnection('default')
+        ->select('webform_submission_data', 'wd');
+      $query->addField('wd', 'webform_id');
+      $query->addField('wd', 'sid');
+      $query->addField('wd', 'name');
+      $query->addField('wd', 'value');
+      $query->condition('webform_id', 'webform_' . $nid);
+      $query->condition('name', $key);
+      $query->condition('value', $value);
+      if (count($candidates)) {
+        $candidates = array_intersect($candidates, array_keys($query->execute()->fetchAllAssoc('sid')));
+      }
+      else {
+        $candidates = array_keys($query->execute()->fetchAllAssoc('sid'));
+      }
+    }
+    if (count($candidates) == 1) {
+      return array_pop($candidates);
+    }
+    return 0;
+  }
+
+  /**
    * Get all errors.
    *
    * @return array
