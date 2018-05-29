@@ -36,7 +36,7 @@ class WebformMigrator {
    * @param int $sid
    *   The legacy sid.
    *
-   * @return int 
+   * @return int
    *   0 if none or it cannot be calculated; otherwise returns the new sid.
    *
    * @throws Exception
@@ -47,7 +47,7 @@ class WebformMigrator {
     $query->addField('wc', 'cid');
     $query->addField('wc', 'form_key');
     $query->condition('nid', $nid);
-    $return = $query->execute()->fetchAllAssoc('cid');
+    $components = $query->execute()->fetchAllAssoc('cid');
 
     $query = $this->getConnection('upgrade')
       ->select('webform_submitted_data', 'wd');
@@ -73,7 +73,7 @@ class WebformMigrator {
       $query->addField('wd', 'sid');
       $query->addField('wd', 'name');
       $query->addField('wd', 'value');
-      $query->condition('webform_id', 'webform_' . $this->nid);
+      $query->condition('webform_id', 'webform_' . $nid);
       $query->condition('name', $key);
       $query->condition('value', $value);
       if (count($candidates)) {
