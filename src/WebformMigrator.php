@@ -35,13 +35,15 @@ class WebformMigrator {
    *   The legacy nid.
    * @param int $sid
    *   The legacy sid.
+   * @param array $ignore
+   *   An array of form keys to ignore when mapping.
    *
    * @return int
    *   0 if none or it cannot be calculated; otherwise returns the new sid.
    *
    * @throws Exception
    */
-  public function d7ToD8sid(int $nid, int $sid) : int {
+  public function d7ToD8sid(int $nid, int $sid, array $ignore = []) : int {
     $query = $this->getConnection('upgrade')
       ->select('webform_component', 'wc');
     $query->addField('wc', 'cid');
@@ -61,7 +63,11 @@ class WebformMigrator {
 
     $results = [];
     foreach ($result as $cid => $field) {
-      $results[$components[$cid]->form_key] = $field->data;
+      $key = $components[$cid]->form_key;
+      if (in_array($key, $ignore)) {
+        continue;
+      }
+      $results[$key] = $field->data;
     }
 
     $candidates = [];

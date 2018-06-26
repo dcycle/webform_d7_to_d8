@@ -69,8 +69,9 @@ This does not affect submissions, only webforms themselves.
 Known issues
 -----
 
-* Certain configuration is not imported, such as thank you pages.
-* Submission ids (`sid`s) are not mapped from D7 to D8. If you need to find a D8 sid from a D7 sid you can run:
+Certain configuration is not imported, such as thank you pages.
+
+Submission ids (`sid`s) are not mapped from D7 to D8. If you need to find a D8 sid from a D7 sid you can run:
 
     Drupal\webform_d7_to_d8\WebformMigrator::instance()->d7ToD8sid($this->nid, $this->id);
 
