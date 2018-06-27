@@ -67,6 +67,11 @@ class WebformMigrator {
       if (in_array($key, $ignore)) {
         continue;
       }
+      // If we later try to compare an empty data field, it might fail, let's
+      // just ignore them.
+      if (!$field->data) {
+        continue;
+      }
       $results[$key] = $field->data;
     }
 
