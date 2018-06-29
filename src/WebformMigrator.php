@@ -116,24 +116,27 @@ class WebformMigrator {
    * @throws Exception
    */
   public function d7ToD8sidMultiple(int $nid, int $sid, array $ignore = []) : array {
-    $query = $this->getConnection('upgrade')
-      ->select('webform_component', 'wc');
-    $query->addField('wc', 'cid');
-    $query->addField('wc', 'form_key');
-    $query->condition('nid', $nid);
-    $components = $query->execute()->fetchAllAssoc('cid');
+    static $static_results = [];
+    if (empty($static_results[$nid][$sid])) {
+      $query = $this->getConnection('upgrade')
+        ->select('webform_component', 'wc');
+      $query->addField('wc', 'cid');
+      $query->addField('wc', 'form_key');
+      $query->condition('nid', $nid);
+      $components = $query->execute()->fetchAllAssoc('cid');
 
-    $query = $this->getConnection('upgrade')
-      ->select('webform_submitted_data', 'wd');
-    $query->addField('wd', 'sid');
-    $query->addField('wd', 'nid');
-    $query->addField('wd', 'cid');
-    $query->addField('wd', 'data');
-    $query->condition('nid', $nid);
-    $query->condition('sid', $sid);
-    $result = $query->execute()->fetchAllAssoc('cid');
+      $query = $this->getConnection('upgrade')
+        ->select('webform_submitted_data', 'wd');
+      $query->addField('wd', 'sid');
+      $query->addField('wd', 'nid');
+      $query->addField('wd', 'cid');
+      $query->addField('wd', 'data');
+      $query->condition('nid', $nid);
+      $query->condition('sid', $sid);
+      $static_results[$nid][$sid] = $query->execute()->fetchAllAssoc('cid');
+    }
 
-    $results = [];
+    $results = $static_results[$nid][$sid];
     foreach ($result as $cid => $field) {
       $key = $components[$cid]->form_key;
       if (in_array($key, $ignore)) {
@@ -250,7 +253,8 @@ class WebformMigrator {
       throw new \Exception('Did not get any results, this probably means you have no webforms on the legacy site, so this module will not do anything!');
     }
     $this->print('');
-    $this->print('OK, got at least one result: @r', ['@r' => array_pop(array_keys($result))]);
+    $keys = array_keys($result);
+    $this->print('OK, got at least one result: @r', ['@r' => array_pop($keys)]);
     $this->print('');
     $this->print('Good news: the connection to your legacy database seems OK!');
     $this->print('');
