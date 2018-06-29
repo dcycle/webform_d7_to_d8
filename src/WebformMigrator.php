@@ -161,6 +161,9 @@ class WebformMigrator {
       $query->condition('value', $value);
       if (count($candidates)) {
         $candidates = array_intersect($candidates, array_keys($query->execute()->fetchAllAssoc('sid')));
+        if (!count($candidates)) {
+          break;
+        }
       }
       else {
         $candidates = array_keys($query->execute()->fetchAllAssoc('sid'));
